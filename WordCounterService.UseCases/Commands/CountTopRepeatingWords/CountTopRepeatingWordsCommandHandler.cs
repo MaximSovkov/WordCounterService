@@ -19,7 +19,7 @@ namespace WordCounterService.UseCases.Commands.CountTopRepeatingWords
     {
         private static readonly IReadOnlyCollection<string> SupportedContentTypes = new List<string>
         {
-            "text/plain"
+            @"text/plain"
         };
 
         /// <summary>

@@ -3,12 +3,11 @@ using System.IO;
 using System.Reflection;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using WordCounterService.UseCases.Commands.CountTopRepeatingWords;
+using WordCounterService.Web.Middlewares;
 
 namespace WordCounterService.Web
 {
@@ -37,7 +36,7 @@ namespace WordCounterService.Web
         /// <param name="services">Service collection.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
 
             services.AddSwaggerGen(c =>
             {
@@ -55,13 +54,9 @@ namespace WordCounterService.Web
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
         /// <param name="app">Application builder.</param>
-        /// <param name="env">Environment.</param>
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            app.UseMiddleware<DomainExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 
