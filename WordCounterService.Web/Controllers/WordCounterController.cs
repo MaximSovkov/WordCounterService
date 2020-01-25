@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
 using WordCounterService.UseCases.Commands.CountTopRepeatingWords;
+using WordCounterService.Web.ViewModels;
 
 namespace WordCounterService.Web.Controllers
 {
@@ -36,6 +37,7 @@ namespace WordCounterService.Web.Controllers
         /// <returns>A list of words with the number of occurrences sorted in descending order.</returns>
         [HttpPost("count-top-repeating-words")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IReadOnlyCollection<TopRepeatingWordsViewModel>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(DomainExceptionViewModel))]
         public async Task<IReadOnlyCollection<TopRepeatingWordsViewModel>> CountTopRepeatingWords([Required] IFormFile textFile,
             [Required] int topCount, CancellationToken cancellationToken)
         {

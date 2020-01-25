@@ -1,5 +1,5 @@
-using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -38,13 +38,21 @@ namespace WordCounterService.Web
         {
             services.AddControllers().AddNewtonsoftJson();
 
-            services.AddSwaggerGen(c =>
+            services.AddSwaggerGen(options =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Word Counter Service API", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Word Counter Service API", Version = "v1" });
 
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
+                var executingAssembly = Assembly.GetExecutingAssembly();
+
+                var xmlDocsFilePathes = executingAssembly.GetReferencedAssemblies()
+                    .Union(new AssemblyName[] { executingAssembly.GetName() })
+                    .Select(assembly => Path.Combine(Path.GetDirectoryName(executingAssembly.Location), $"{assembly.Name}.xml"))
+                    .Where(file => File.Exists(file)).ToArray();
+
+                foreach (var filePath in xmlDocsFilePathes)
+                {
+                    options.IncludeXmlComments(filePath);
+                }
             });
 
             services.AddMediatR(Assembly.GetAssembly(typeof(CountTopRepeatingWordsCommandHandler)));
@@ -61,10 +69,10 @@ namespace WordCounterService.Web
             app.UseHttpsRedirection();
 
             app.UseSwagger();
-            app.UseSwaggerUI(c =>
+            app.UseSwaggerUI(options =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-                c.RoutePrefix = string.Empty;
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                options.RoutePrefix = string.Empty;
             });
 
             app.UseRouting();
